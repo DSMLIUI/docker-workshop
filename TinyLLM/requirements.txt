@@ -1,0 +1,13 @@
+# Core framework
+streamlit==1.29.0
+
+transformers==4.35.0
+torch==2.1.0+cpu
+torchvision==0.16.0+cpu
+torchaudio==2.1.0+cpu
+sentencepiece==0.1.99
+protobuf==3.20.3
+
+# Additional dependencies
+accelerate==0.24.1
+safetensors==0.4.0
