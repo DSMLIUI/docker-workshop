@@ -19,7 +19,7 @@ Learn why we need Docker Compose and what problems it solves.
 **Step 1**: Try running multiple containers manually
 ```bash
 # This is painful without Docker Compose!
-docker run -d --name db postgres:15-alpine -e POSTGRES_PASSWORD=pass
+docker run -d --name db -e POSTGRES_PASSWORD=pass postgres:15-alpine
 docker run -d --name app --link db:db nginx:alpine
 ```
 
@@ -46,18 +46,18 @@ Docker Compose solves these problems by:
 ## Exercise 1: Set Up Project Structure
 
 ### Task
-Navigate to folder docker-compose 
+Navigate to folder docker compose 
 
 ```bash
 cd ..
-cd docker-compose
+cd docker compose
 ```
 ## Exercise 2: Check Database Schema & Environment
 
 ### Task
 Open the init.sql adn the .env file to view the configuration
 
-## Exercise 3: Review docker-compose.yml
+## Exercise 3: Review docker compose.yml
 
 ### Task
 Review Docker Compose configuration for PostgreSQL + pgAdmin stack.
@@ -88,7 +88,7 @@ Launch PostgreSQL database with pgAdmin UI using Docker Compose.
 
 **Step 1**: Start all services
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 This creates:
@@ -99,7 +99,7 @@ This creates:
 
 **Step 2**: Check status
 ```bash
-docker-compose ps
+docker compose ps
 ```
 **Step 3**: Access pgAdmin
 Open **http://localhost:5050** in your browser
@@ -167,16 +167,16 @@ docker volume inspect database-demo_postgres_data
 **Step 3**: Test data persistence
 ```bash
 # Add test data
-docker-compose exec db psql -U dbuser -d ecommerce -c "INSERT INTO users (name, email) VALUES ('Test User', 'test@example.com');"
+docker compose exec db psql -U dbuser -d ecommerce -c "INSERT INTO users (name, email) VALUES ('Test User', 'test@example.com');"
 
 # Stop containers
-docker-compose down
+docker compose down
 
 # Start again
-docker-compose up -d
+docker compose up -d
 
 # Check data is still there!
-docker-compose exec db psql -U dbuser -d ecommerce -c "SELECT * FROM users WHERE email='test@example.com';"
+docker compose exec db psql -U dbuser -d ecommerce -c "SELECT * FROM users WHERE email='test@example.com';"
 ```
 
 **Key Learning**: 
@@ -195,31 +195,31 @@ Learn to troubleshoot common Docker Compose issues.
 ```bash
 # Issue: "Port already allocated"
 # Solution: Change port or stop conflicting service
-docker-compose down
-# Edit docker-compose.yml ports: "5433:5432"
-docker-compose up -d
+docker compose down
+# Edit docker compose.yml ports: "5433:5432"
+docker compose up -d
 
 # Issue: "Cannot connect to database"
 # Solution: Check service is healthy
-docker-compose ps
+docker compose ps
 # Wait for db to be "healthy", not just "up"
 ```
 
 **Step 2**: Debug service communication
 ```bash
 # Check if services can reach each other
-docker-compose exec db-ui ping db
+docker compose exec db-ui ping db
 
 # View service logs
-docker-compose logs db
-docker-compose logs db-ui
+docker compose logs db
+docker compose logs db-ui
 ```
 
 **Step 3**: Reset if needed
 ```bash
 # Nuclear option (removes everything including data!)
-docker-compose down -v
-docker-compose up -d
+docker compose down -v
+docker compose up -d
 ```
 
 ### Expected Result
@@ -239,28 +239,28 @@ Learn essential Docker Compose management commands.
 **Step 1**: View logs
 ```bash
 # View all logs
-docker-compose logs
+docker compose logs
 
 # View specific service logs
-docker-compose logs db
+docker compose logs db
 ```
 
 **Step 2**: Manage services
 ```bash
 # Restart a service
-docker-compose restart db-ui
+docker compose restart db-ui
 
 # Stop services
-docker-compose down
+docker compose down
 ```
 
 **Step 3**: Clean up (when done)
 ```bash
 # Remove containers and networks, keep volumes
-docker-compose down
+docker compose down
 
 # Remove everything including volumes (⚠️ deletes data!)
-docker-compose down -v
+docker compose down -v
 ```
 
 ---
