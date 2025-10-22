@@ -71,7 +71,8 @@ docker history my-first-image
 
 **Step 1**: Navigate to sample app directory
 ```bash
-cd modules-2hr-compressed/sample-app
+cd ..
+cd TinyLLM
 ```
 
 **Step 2**: Examine the `app.py`
