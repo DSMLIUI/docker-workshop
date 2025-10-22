@@ -69,7 +69,7 @@ docker run -d -p 8080:80 --name web1 nginx:alpine
 
 **Step 2**: Run httpd (Apache) on port 8081
 ```bash
-docker run -d -p 8081:80 --name web2 httpd:alpine
+docker run -d -p 8082:80 --name web3 httpd:alpine
 ```
 
 **Step 3**: Verify both of them are running
@@ -95,26 +95,26 @@ You should see three containers running and be able to access all three web serv
 **Step 1**: Open New Terminal - Generate requests
 ```bash
 # Make requests to web1
-for i in {1..5000}; do curl http://localhost:8080; sleep 0.5; done
+for i in {1..5000}; do curl http://localhost:8081; sleep 0.5; done
 ```
 
 **Step 2**: View the logs
 ```bash
-docker logs web1
+docker logs web2
 ```
 
 **Step 3**: Follow logs in real-time (open a new terminal)
 ```bash
-docker logs -f web1
+docker logs -f web2
 ```
 
 **Step 4**: Try different log options
 ```bash
 # Show only last 10 lines
-docker logs --tail 10 web1
+docker logs --tail 10 web2
 
 # Show logs with timestamps
-docker logs -t web1
+docker logs -t web2
 ```
 
 ### Expected Result
@@ -176,7 +176,7 @@ exit
 
 **Step 7**: Restart it (stop + start in one command) - 
 ```bash
-docker restart lifecycle
+docker restart explorer
 ```
 
 **Step 8**: View stats (Ctrl+C to exit) - Resource Monitoring
