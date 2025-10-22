@@ -30,6 +30,6 @@ CMD ["streamlit", "run", "app.py", \
      "--server.address=0.0.0.0", \
      "--server.port=8501", \
      "--server.headless=true", \
-     "--server.enableXsrfProtection=false", \s
+     "--server.enableXsrfProtection=false", \
      "--browser.gatherUsageStats=false", \
      "--server.runOnSave=false"]
