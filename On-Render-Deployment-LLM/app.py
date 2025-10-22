@@ -54,7 +54,7 @@ def generate_story(client, prompt, max_length=200):
 
         try:
             completion = client.chat.completions.create(
-                model="mixtral-8x7b-32768",  # Fast and capable model on Groq
+                model="openai/gpt-oss-20b",  # Fast and capable model on Groq
                 messages=[
                     {"role": "system", "content": system_message},
                     {"role": "user", "content": formatted_prompt},
@@ -70,9 +70,6 @@ def generate_story(client, prompt, max_length=200):
 
             response = re.sub(r"\s+", " ", response)
             response = response.strip()
-
-            if not response or len(response.strip()) < 20:
-                raise Exception("Generated response too short")
 
         except Exception as model_error:
             st.warning(
@@ -128,7 +125,7 @@ with st.sidebar:
             """
         **Groq API**
         - Provider: Groq
-        - Model: mixtral-8x7b-32768
+        - Model: openai/gpt-oss-20b
         - Ultra-low latency API
         """
         )
