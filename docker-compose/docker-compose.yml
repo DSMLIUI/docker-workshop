@@ -27,7 +27,7 @@ services:
     image: phpmyadmin:latest
     container_name: demo-phpmyadmin
     ports:
-      - "8082:80"
+      - "8085:80"
     environment:
       PMA_HOST: mysql
       PMA_PORT: 3306

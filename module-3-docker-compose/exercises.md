@@ -102,7 +102,7 @@ This creates:
 docker compose ps
 ```
 **Step 3**: Access pgAdmin
-Open **http://localhost:5050** in your browser
+Open **http://localhost:8085** in your browser
 
 Login:
 - Email: `admin@example.com`
@@ -116,7 +116,7 @@ Connect pgAdmin UI to the PostgreSQL database using Docker network.
 ### Instructions
 
 **Step 1**: Add database server in pgAdmin
-- In pgAdmin (http://localhost:5050), right-click "Servers" → "Register" → "Server"
+- In pgAdmin (http://localhost:8085), right-click "Servers" → "Register" → "Server"
 - **General tab**: Name: `E-Commerce DB`
 - **Connection tab**:
   - Host: `db` ← **Key: Use service name, not localhost!**

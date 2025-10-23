@@ -74,7 +74,7 @@ This may take 3-5 minutes if not cached.
 
 **Step 4**: Test it locally
 ```bash
-docker run -d --name story-test -p 8501:8501 story-generator:latest
+docker run -d --name story-test -p 8501:8501 myllm:latest
 
 # Wait 30-60 seconds for model to load, then test
 curl http://localhost:8501
@@ -132,18 +132,18 @@ You should see "Login Succeeded"!
 **Step 2**: Tag your image with your Docker Hub username
 ```bash
 # Replace YOUR_USERNAME with your actual Docker Hub username
-docker tag story-generator:latest YOUR_USERNAME/story-generator:latest
+docker tag myllm:latest YOUR_USERNAME/myllm:latest
 
-# Example: docker tag story-generator:latest johndoe/story-generator:latest
+# Example: docker tag myllm:latest johndoe/myllm:latest
 ```
 
 **Step 3**: Push to Docker Hub
 ```bash
-docker push YOUR_USERNAME/story-generator:latest
+docker push YOUR_USERNAME/myllm:latest
 ```
 
 **Step 4**: Verify on Docker Hub
-- Visit https://hub.docker.com/r/YOUR_USERNAME/story-generator
+- Visit https://hub.docker.com/r/YOUR_USERNAME/myllm
 - You should see your image listed!
 
 ### Expected Result
@@ -151,90 +151,10 @@ docker push YOUR_USERNAME/story-generator:latest
 - ✅ Image tagged correctly
 - ✅ Image pushed successfully  
 - ✅ Visible on Docker Hub website
-- ✅ Public URL: `YOUR_USERNAME/story-generator:latest`
+- ✅ Public URL: `YOUR_USERNAME/myllm:latest`
 
-## Exercise 4: Create OnRender Account (2 minutes)
+### Create GROQ_API_KEY from [grow](https://groq.com) - Save it somewhere
 
-### Task
-Set up your free OnRender account for deployment.
+### Create OnRender Account 
 
-### Instructions
-
-**Step 1**: Visit [render.com](https://render.com)
-
-**Step 2**: Click "Get Started"
-
-**Step 3**: Sign up
-- **Email** or **GitHub** (both work fine)
-- Verify email if needed
-
-**Step 4**: Explore dashboard
-- See "New +" button (top right)
-- Free tier indication
-
-### Expected Result
-- ✅ OnRender account created
-- ✅ Dashboard accessible
-- ✅ Ready to deploy from Docker Hub
-
-## Exercise 5: Deploy to OnRender from Docker Hub! 🚀 (8 minutes)
-
-### Task
-Deploy your LLM Story Generator to the cloud using your Docker Hub image.
-
-### Instructions
-
-**Step 1**: Create new Web Service in OnRender
-1. In OnRender dashboard, click "New +" → "Web Service"
-2. Choose "Deploy an existing image from a registry"
-
-**Step 2**: Configure the service
-
-**Image URL**: 
-```
-docker.io/YOUR_USERNAME/story-generator:latest
-```
-Replace `YOUR_USERNAME` with your Docker Hub username!
-
-**Basic Settings**:
-- **Name**: `story-generator` (or your choice)
-- **Region**: Choose closest to you
-- **Instance Type**: **Free** ⚡
-
-**Step 4**: Create Web Service
-
-Click "Create Web Service"!
-
-OnRender will now:
-1. Pull your image from Docker Hub
-2. Start the container
-3. Assign a public URL
-4. Set up HTTPS automatically!
-
-This takes **5-10 minutes** for first deployment.
-
-**Step 5**: Watch the deployment
-You'll see logs:
-```
-==> Pulling image docker.io/YOUR_USERNAME/story-generator:latest
-==> Starting service...
-==> Downloading model (DistilGPT2)...
-==> Your service is live 🎉
-```
-
-**Step 6**: Get your public URL!
-
-Once deployed, you'll see:
-```
-https://story-generator-XXXX.onrender.com
-```
-
-Click it! 🎉
-
-### Expected Result
-- ✅ Service deployed successfully
-- ✅ Public HTTPS URL active
-- ✅ Story Generator accessible worldwide!
-- ✅ Anyone can use your LLM app!
-
----
+# Congrats for completing the workshop
