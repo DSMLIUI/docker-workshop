@@ -2,7 +2,6 @@ import streamlit as st
 from groq import Groq
 import time
 import os
-import re
 
 if "GROQ_API_KEY" not in os.environ:
     st.error(
@@ -15,8 +14,8 @@ if "GROQ_API_KEY" not in os.environ:
 
 
 st.set_page_config(
-    page_title="Story Generator - Groq",
-    page_icon="📚",
+    page_title="Chat Assistant - Groq",
+    page_icon="💬",
     layout="wide",
 )
 
@@ -34,76 +33,31 @@ def load_client():
         return None
 
 
-def generate_story(client, prompt, max_length=200):
-    """Generate a story using the Groq API."""
+def get_chat_response(client, messages, model, temperature=0.7, max_tokens=1024):
+    """Generate a chat response using the Groq API."""
     try:
-        if not prompt.lower().startswith("once upon a time"):
-            formatted_prompt = f"Once upon a time {prompt.lower()}"
-        else:
-            formatted_prompt = prompt
-
         start_time = time.time()
 
-        # System prompt to guide the model
-        system_message = (
-            "You are a creative storyteller. "
-            "Continue the story based on the user's prompt. "
-            "Do not repeat the user's prompt; only write the continuation. "
-            "The story should be engaging and at least 50 words long."
+        completion = client.chat.completions.create(
+            model=model,
+            messages=messages,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            top_p=0.95,
+            stream=True,
         )
 
-        try:
-            completion = client.chat.completions.create(
-                model="openai/gpt-oss-20b",  # Fast and capable model on Groq
-                messages=[
-                    {"role": "system", "content": system_message},
-                    {"role": "user", "content": formatted_prompt},
-                ],
-                max_tokens=max_length,
-                temperature=0.8,
-                top_p=0.95,
-                stream=False,  # We'll get the full response and stream it manually
-            )
+        response = ""
+        for chunk in completion:
+            if chunk.choices[0].delta.content:
+                response += chunk.choices[0].delta.content
+                yield chunk.choices[0].delta.content
 
-            response_time = time.time() - start_time
-            response = completion.choices[0].message.content
-
-            response = re.sub(r"\s+", " ", response)
-            response = response.strip()
-
-        except Exception as model_error:
-            st.warning(
-                f"Model generation failed ({model_error}), using fallback story."
-            )
-            response_time = time.time() - start_time
-            response = get_fallback_story(prompt)
-
+        response_time = time.time() - start_time
         return response, response_time
 
     except Exception as e:
-        return f"Sorry, I encountered an error: {str(e)}", 0
-
-
-def get_fallback_story(prompt):
-    """Generate fallback stories based on prompt content"""
-    prompt_lower = prompt.lower()
-
-    if "robot" in prompt_lower:
-        return "there was a friendly robot named Rob who lived in a small village. Rob loved to help people and make their lives easier. One day, Rob discovered that the village's water pump was broken, so it used its mechanical skills to fix it. The villagers were so grateful that they threw a celebration in Rob's honor."
-    elif "magical" in prompt_lower or "forest" in prompt_lower:
-        return "there was an enchanted forest where the trees whispered secrets and the flowers glowed with magical light. A young explorer named Luna discovered that the forest was home to talking animals and mystical creatures. Together, they embarked on a quest to save the forest from an evil spell that was making the magic fade away."
-    elif "friendship" in prompt_lower or "friend" in prompt_lower:
-        return "there were two best friends, Maya and Alex, who lived in neighboring villages. When a terrible storm separated their villages, Maya and Alex worked together to build a bridge that would reunite their communities. Through their friendship, they taught everyone that cooperation and kindness can overcome any obstacle."
-    elif "knight" in prompt_lower:
-        return "there was a brave knight who protected the kingdom from dragons and dark magic. One day, the knight discovered that the real treasure was not gold or jewels, but the happiness and safety of the people they protected."
-    elif "cat" in prompt_lower:
-        return "there was a curious cat named Whiskers who loved to explore. One day, Whiskers found a secret garden behind the old library where magical creatures lived. The cat became the guardian of this hidden world, protecting it from those who would harm its beauty."
-    elif "wizard" in prompt_lower:
-        return "there was a wise old wizard who lived in a tower filled with books and potions. The wizard spent their days teaching young apprentices about magic, but their greatest lesson was that true magic comes from kindness and helping others."
-    elif "dragon" in prompt_lower:
-        return "there was a gentle dragon who lived in the mountains and collected shiny stones instead of gold. The dragon became friends with a brave child who showed everyone that dragons could be kind and helpful, not scary monsters."
-    else:
-        return "there was a brave adventurer who set out on a journey to discover new lands. Along the way, they met interesting characters, faced exciting challenges, and learned valuable lessons about courage, friendship, and the importance of following one's dreams."
+        yield f"Sorry, I encountered an error: {str(e)}"
 
 
 if "messages" not in st.session_state:
@@ -111,26 +65,102 @@ if "messages" not in st.session_state:
 if "client_loaded" not in st.session_state:
     st.session_state.client_loaded = False
 
-st.title("📚 Story Generator")
-st.caption("Powered by Groq • mixtral-8x7b-32768")
+st.title("💬 Chat Assistant")
+
+# Model information
+MODELS = {
+    "llama-3.1-8b-instant": {
+        "name": "Llama 3.1 8B",
+        "speed": "560 T/sec",
+        "context": "131K",
+        "max_output": 131072
+    },
+    "llama-3.3-70b-versatile": {
+        "name": "Llama 3.3 70B",
+        "speed": "280 T/sec",
+        "context": "131K",
+        "max_output": 32768
+    },
+    "meta-llama/llama-guard-4-12b": {
+        "name": "Llama Guard 4 12B",
+        "speed": "1200 T/sec",
+        "context": "131K",
+        "max_output": 1024
+    },
+    "openai/gpt-oss-120b": {
+        "name": "GPT OSS 120B",
+        "speed": "500 T/sec",
+        "context": "131K",
+        "max_output": 65536
+    },
+    "openai/gpt-oss-20b": {
+        "name": "GPT OSS 20B",
+        "speed": "1000 T/sec",
+        "context": "131K",
+        "max_output": 65536
+    }
+}
+
+if "selected_model" not in st.session_state:
+    st.session_state.selected_model = "llama-3.3-70b-versatile"
+
+current_model = MODELS[st.session_state.selected_model]
+st.caption(f"Powered by Groq • {current_model['name']} • {current_model['speed']}")
 
 with st.sidebar:
+    st.markdown("### Model Selection")
+    
+    selected_model = st.selectbox(
+        "Choose Model",
+        options=list(MODELS.keys()),
+        format_func=lambda x: f"{MODELS[x]['name']} ({MODELS[x]['speed']})",
+        index=list(MODELS.keys()).index(st.session_state.selected_model),
+        help="Select the AI model for chat responses"
+    )
+    
+    # Update model and clear chat if changed
+    if selected_model != st.session_state.selected_model:
+        st.session_state.selected_model = selected_model
+        st.session_state.messages = []
+        st.rerun()
+    
     st.markdown("### Settings")
-    max_length = st.slider(
-        "Story Length", min_value=100, max_value=300, value=200, step=10
+    
+    temperature = st.slider(
+        "Temperature",
+        min_value=0.0,
+        max_value=2.0,
+        value=0.7,
+        step=0.1,
+        help="Higher values make output more random, lower values more deterministic"
+    )
+    
+    # Dynamic max tokens based on selected model
+    max_output_tokens = MODELS[selected_model]["max_output"]
+    default_tokens = min(1024, max_output_tokens)
+    
+    max_tokens = st.slider(
+        "Max Tokens",
+        min_value=256,
+        max_value=min(8192, max_output_tokens),
+        value=default_tokens,
+        step=256,
+        help=f"Maximum length of the response (model limit: {max_output_tokens:,})"
     )
 
-    with st.expander("ℹ️ Model Info"):
+    with st.expander("ℹ️ Current Model Info"):
+        model_info = MODELS[selected_model]
         st.markdown(
-            """
-        **Groq API**
-        - Provider: Groq
-        - Model: openai/gpt-oss-20b
-        - Ultra-low latency API
+            f"""
+        **{model_info['name']}**
+        - Speed: {model_info['speed']}
+        - Context Window: {model_info['context']} tokens
+        - Max Output: {model_info['max_output']:,} tokens
+        - Provider: Groq (Ultra-low latency)
         """
         )
 
-    if st.button("Clear", use_container_width=True):
+    if st.button("Clear Chat", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
 
@@ -145,54 +175,64 @@ if not st.session_state.client_loaded:
 else:
     client = st.session_state.client
 
+# Display chat messages
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-chat_input = st.chat_input("Start your story idea...")
-if chat_input:
-    prompt = chat_input
+# Chat input
+if prompt := st.chat_input("Message Chat Assistant..."):
+    # Add user message
     st.session_state.messages.append({"role": "user", "content": prompt})
-
+    
     with st.chat_message("user"):
-        st.markdown(f"**Your idea:** {prompt}")
+        st.markdown(prompt)
 
+    # Generate assistant response
     with st.chat_message("assistant"):
-        with st.spinner("Writing story..."):
-            response, response_time = generate_story(
-                client, prompt, max_length
-            )
-
-        full_story = f"Once upon a time {response}"
-
-        words = full_story.split()
-        displayed_story = ""
         message_placeholder = st.empty()
+        full_response = ""
+        
+        # Prepare messages for API (only role and content)
+        api_messages = [
+            {"role": m["role"], "content": m["content"]}
+            for m in st.session_state.messages
+        ]
+        
+        # Stream the response
+        for chunk in get_chat_response(
+            client, 
+            api_messages, 
+            st.session_state.selected_model,
+            temperature, 
+            max_tokens
+        ):
+            full_response += chunk
+            message_placeholder.markdown(full_response + "▌")
+        
+        message_placeholder.markdown(full_response)
+    
+    # Add assistant message to history
+    st.session_state.messages.append({"role": "assistant", "content": full_response})
 
-        for word in words:
-            displayed_story += word + " "
-            message_placeholder.markdown(displayed_story + "▌")
-            time.sleep(0.03)
-
-        message_placeholder.markdown(displayed_story)
-
-    st.session_state.messages.append(
-        {"role": "assistant", "content": full_story}
-    )
-
+# Welcome message for new users
 if len(st.session_state.messages) == 0:
     st.markdown("### Welcome!")
     st.info(
-        "Type a story idea and it will create a story starting with 'Once upon a time...'"
+        "👋 I'm your AI assistant powered by Groq. Ask me anything!"
     )
 
-    with st.expander("💡 Example Ideas"):
+    with st.expander("💡 Example Prompts"):
         col1, col2 = st.columns(2)
         with col1:
             st.markdown(
-                "• a brave knight\n• a magical forest\n• a friendly robot"
+                "• Explain quantum computing\n"
+                "• Write a Python function\n"
+                "• Summarize recent AI trends"
             )
         with col2:
             st.markdown(
-                "• a curious cat\n• two best friends\n• a wise wizard"
+                "• Help me debug code\n"
+                "• Create a recipe\n"
+                "• Brainstorm ideas"
             )
